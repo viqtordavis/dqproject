@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="content">
+    <form action="adddqcheck" method="POST" id="dqcheckform" data-tables-url="{% url 'loadtables' %}" novalidate enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <h1> Rules Configuration</h1>
+        <!-- {{ form.as_p }} -->
+        <label for="dqcheckname">Enter Name For This Check : </label>
+        <input type="text" name="dqcheckname" id="dqcheckname">
+
+        <br><br>
+
+        <label for="id_connections">Select Database Connection :</label>
+
+        <select id="id_connections" name="id_connections"  required>
+            <option value="" disabled="true" selected>-- Select --</option>
+            {% for connection in connectionlist %}
+            <option value="{{ connection.id }}">{{ connection.connectionname }}</option>
+            {% endfor %}
+        </select>
+
+        <br><br>
+
+       
+        <label for="tables">Select Table :</label>
+        
+        <select name="tables"  id="tables" data-colrule-url="{% url 'loadcolumnNrules' %}" novalidate>
+            <option value="" disabled="true" selected>-- Select --</option>     
+        </select>
+        <button type="button" name="qprofile" id="qprofile" disabled="true">Quick Profile</button>
+
+                <br><br>
+        
+             
+            <table id="columntable">
+            
+                    <tr>
+                        <td colspan="1">Select Column</td>
+                        <td colspan="1">Select Quality Check</td>
+                        <td colspan="1">Provide Test Values</td>
+                        <td><button type="button" id="addrow"></button></td>
+                        
+                    </tr>
+                
+                
+                    <tr id="tablerow">  
+                                         
+                    </tr>
+                
+                
+            </table>
+
+        <br><br>
+
+        <input type="submit" value="Save DQ Check">
+
+        <br><br>
+        
+        {% for message in messages %}
+        <div class="message">
+        {{ message }}
+        </div>
+        {% endfor %}
+        
+    </form>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+        $("#id_connections").change(function () {
+        var url = $("#dqcheckform").attr("data-tables-url");  // get the url of the `loadtables` view
+        var connectionId = $(this).val();  // get the selected connection id from the HTML input
+
+        $.ajax({                       // initialize an AJAX request
+            url: url,                    // set the url of the request (= localhost:8000/ajax/loadtables/)
+            data: {
+            'connectionid': connectionId       // add the connection id to the GET parameters
+            },
+            success: function (data) {   // `data` is the return of the `loadtables` view function
+                console.log(data);
+            $("#tables").html(data);  // replace the contents of the table input with the data that came from the server
+            }
+        });
+
+        });
+
+        $(document).ready(function(){
+            $(document).on('click','#addrow', function(){
+                var htmlappend = '';
+                var url = $("#tables").attr("data-colrule-url");  // get the url of the `loadcolumnNrules` view
+                var connectionId = $("#id_connections").val();  // get the selected connection ID from the HTML input
+                var tablename = $("#tables").val(); // get the selected table from the HTML input
+         
+                 $.ajax({                       // initialize an AJAX request
+                     url: url,                    // set the url of the request (= localhost:8000/ajax/loadcolumnNrules/)
+                     data: {
+                     'connectionid': connectionId, // add the connectioned id to the GET parameters
+                     'tablename': tablename       // add the tablename to the GET parameters
+                     },
+                     success: function (data) { 
+                         console.log(data)  // `data` is the return of the `loadcolumnNrules` view function
+                        htmlappend += '<tr>';
+                        htmlappend += data;
+                        htmlappend += '</tr>';
+                     $("#columntable").append(htmlappend);  // replace the contents of the column and dq rule input with the data that came from the server
+                     }
+                    });
+                    
+                });
+        
+        });
+
+        $(document).on('click', '#removerow',function(){ 
+            $(this).closest('tr').remove();
+        }); // this is function to remove the table row
+
+     
+        $("#tables").change(function () {
+            var url = $("#tables").attr("data-colrule-url");  // get the url of the `loadcolumnNrules` view
+            var connectionId = $("#id_connections").val();  // get the selected connection ID from the HTML input
+            var tablename = $(this).val(); // get the selected table from the HTML input
+            
+            if(tablename !='') {                 
+                document.getElementById("qprofile").disabled=false;
+              }; 
+            
+            $.ajax({                       // initialize an AJAX request
+                url: url,                    // set the url of the request (= localhost:8000/ajax/loadcolumnNrules/)
+                data: {
+                'connectionid': connectionId, // add the connection id to the GET parameters
+                'tablename': tablename       // add the table name to the GET parameters
+                },
+                success: function (data) {   // `data` is the return of the `loadcolumnNrules` view function
+                    console.log(data);
+                $("#tablerow").html(data);  // replace the contents of the column and dq rule input with the data that came from the server
+                }
+            });
+    
+            });
+
+            $(document).ready(function(){
+                $(document).on('click','#qprofile', function(e){
+                    e.preventDefault();
+                    var connectionId = $("#id_connections").val();
+                    var tablename = $("#tables").val();
+                    var url = '/dqcharts/'+ connectionId + '|' + tablename;
+                    
+                    console.log(url)
+                                       
+                    window.open(url);
+
+                                           
+                    });
+            
+            });
+            $(document).ready(function() {
+                // messages timeout for 10 sec 
+                $(".message").show().delay(6000).fadeOut(1000);
+            });
+    </script>
+</div>
+    
+
+
+{% endblock %}

@@ -1,0 +1,21 @@
+<td> <select name="column" id="column"> 
+    <option value="">---------</option> 
+    {% for column in columnlist %} 
+    <option value="{{ column }}">{{ column }}</option> 
+    {% endfor %} 
+</select>
+</td>
+
+<td> <select name="dqrule" id="dqrule"> 
+    <option value="">---------</option> 
+    {% for dqrule in dqrulelist %} 
+    <option value="{{ dqrule }}">{{ dqrule }}</option> 
+    {% endfor %} 
+</select>
+</td>
+
+<td> <input type="text" name="optvalues" id="optvalues"> </td>
+<td><button type="button" id="removerow"></button></td>
+
+
+

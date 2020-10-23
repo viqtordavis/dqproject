@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="content">
+    
+    <form id="rundqform" >
+        <h1> Rules Execution</h1>
+        {% csrf_token %} 
+
+        <label for="dqcheck">Select Check :</label>
+
+        <select name="dqcheck" id="dqcheck" data-batchrun-url="{% url 'loadbatchrun' %}" novalidate >
+            <option value="" disabled="true" selected>-- Select --</option>
+            {% for dqcheck in dqchecklist %}
+            <option value="{{ dqcheck.id }}">{{ dqcheck.dqcheckname }}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="Run DQ Check">
+        
+
+        <br><br>
+        {% for message in messages %}
+        {{ message }}
+        {% endfor %}
+
+    </form>
+
+    <br>
+
+    <label for="batchruntable">Execution History For Selected Check</label>
+
+    <br><br>
+
+    <table id="batchruntable">
+        <thead>
+        
+            <tr>
+                <td colspan="1">Run Start Time</td>
+                <td colspan="1">Run End Time</td>
+                <td colspan="1">Run Status</td>
+            </tr>
+        </thead>
+    
+        <tbody id="runbatch">
+        
+        </tbody>
+    
+    
+</table>
+
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script>
+
+    $(document).on('submit','#rundqform', function(e){
+        e.preventDefault();
+
+        $.ajax({
+            type:'POST',
+            url:'/rundqcheck/rundq/',
+            data:{
+                dqcheck:$('#dqcheck').val(),
+                csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+            },
+            success:function(){
+                var url = $("#dqcheck").attr("data-batchrun-url");  // get the url of the `loadbatchrun` view
+                var dqcheckid = $("#dqcheck").val(); // get the selected table from the HTML input
+
+                $.ajax({                       // initialize an AJAX request
+                    url: url,                    // set the url of the request (= localhost:8000/ajax/loadbatchrun/)
+                    data: {
+                    'dqcheckid': dqcheckid // add the connection id to the GET parameters
+                    },
+                    success: function (data) {   // `data` is the return of the `loadbatchrun` view function
+                        console.log(data);
+                    $("#runbatch").html(data);  // replace the contents of the column and dq rule input with the data that came from the server
+                    }
+                });
+            }
+
+
+        });
+
+    });
+
+    $("#dqcheck").change(function () {
+        var url = $("#dqcheck").attr("data-batchrun-url");  // get the url of the `loadbatchrun` view
+        var dqcheckid = $(this).val(); // get the selected table from the HTML input
+
+        $.ajax({                       // initialize an AJAX request
+            url: url,                    // set the url of the request (= localhost:8000/ajax/loadbatchrun/)
+            data: {
+            'dqcheckid': dqcheckid // add the connection id to the GET parameters
+            },
+            success: function (data) {   // `data` is the return of the `loadbatchrun` view function
+                console.log(data);
+            $("#runbatch").html(data);  // replace the contents of the column and dq rule input with the data that came from the server
+            }
+        });
+
+        });
+    
+        //// This function will regresh the status of batch run table when refresh is clicked
+    $(document).ready(function(){
+            $(document).on('click','#dqrunrefresh', function(e){
+                    e.preventDefault();
+                    var tt = $(this).attr("data-id");
+                    var url = $("#dqcheck").attr("data-batchrun-url");  // get the url of the `loadbatchrun` view
+                    var dqcheckid = $("#dqcheck").val(); // get the selected table from the HTML input
+
+                    $.ajax({                       // initialize an AJAX request
+                        url: url,                    // set the url of the request (= localhost:8000/ajax/loadbatchrun/)
+                        data: {
+                        'dqcheckid': dqcheckid // add the connection id to the GET parameters
+                        },
+                        success: function (data) {   // `data` is the return of the `loadbatchrun` view function
+                            console.log(tt);
+                        $("#runbatch").html(data);  // replace the contents of the column and dq rule input with the data that came from the server
+                        }
+                    });
+                    
+                });
+        
+        });
+    
+        //// This function will call api url to fetch the data from dq fact when view report is clicked
+
+    $(document).ready(function(){
+            $(document).on('click','#dqreport', function(e){
+                    e.preventDefault();
+                    var id = $(this).attr("data-id");
+                    var linkHref = $(this).attr('href');
+                    var targetAttr = $(this).attr('target');
+                                       
+                    window.open(linkHref);
+                    
+
+                });
+        
+        });
+
+</script>
+
+{% endblock %}

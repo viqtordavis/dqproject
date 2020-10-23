@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="content">
+<form  method="POST" enctype="multipart/form-data" id="fileForm">
+
+  {% csrf_token %}
+
+  <label for="dqcheckfile">
+    <strong>Upload the DQ check file</strong>
+  </label>
+  <br><br>
+  <input type="file" id="dqcheckfile" name="dqcheckfile">
+  <br><br>
+
+  <label for="delimiter">Field Separator : </label>
+  <select name="delimiter" id="delimiter">
+    <option value="comma">Comma</option>
+    <option value="pipe">Pipe</option>
+    <option value="tab">Tab</option>
+  </select>
+
+  <br><br>
+
+  <label for="filehead">First Line Column Names : </label>
+  <input type="checkbox" id="filehead" name="filehead" checked>
+  
+
+  <br><br>
+
+  <label for="filetrail">File Has Trailer : </label>
+  <input type="checkbox" id="filetrail" name="filetrail">
+  
+
+  <br><br>
+  
+  <input type="submit" value="Run Profile" >
+
+
+
+<br><br>
+    {% for message in messages %}
+        {{ message }}
+    {% endfor %}
+
+</form>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script>
+
+  var token = '{{csrf_token}}';
+
+  $(document).ready(function(){
+    $(document).on('submit','#fileForm', function(e){
+      e.preventDefault();
+
+      $form = $(this)
+      var formData = new FormData(this);
+
+      console.log(formData)
+
+      var url = '/runfileprofile/';
+                
+      $.ajax({   
+        type: "POST",
+        //csrfmiddlewaretoken: '{{ csrf_token }}',
+        headers: { "X-CSRFToken": token },
+        url: url,                    
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function (data) {   
+          window.open(data)
+          
+        }
+    });
+                               
+    });
+
+});
+</script>
+</div>
+{% endblock %}

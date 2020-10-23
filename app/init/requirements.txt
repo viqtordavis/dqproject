@@ -1,0 +1,7 @@
+Django==3.0.3
+numpy==1.17.2
+pandas==0.25.1
+pyodbc==4.0.27
+mysqlclient==1.4.6
+djangorestframework==3.11.0
+pandas-profiling==1.4.1

@@ -1,0 +1,27 @@
+{% for batchrun in batchrunlist %}
+<tr>
+    <td> {{ batchrun.runstarttime }} </td>
+    
+
+    <td> {{ batchrun.runendtime }} </td>
+    
+
+    <td > {{ batchrun.runstatus }} </td>
+
+    {% if batchrun.runstatus == "Completed" %}
+    
+        <td><a href="/dqcharts/{{ batchrun.id }}" id="dqreport" data-id="{{ batchrun.id }}">View Report</a></button></td>
+
+    {% elif batchrun.runstatus == "Running"  %}
+
+        <td><a href="" id="dqrunrefresh" data-id="{{ batchrun.id }}">Refresh</a></button></td>
+
+    {% else  %}
+
+        <td><a href="" id="dqrunerrorreport" data-id="{{ batchrun.id }}">Error</a></button></td>
+        
+    {% endif %}
+
+</tr>
+
+{% endfor %}

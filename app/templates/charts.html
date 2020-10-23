@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+
+            div
+            {
+                display: block;
+                position: relative;
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+            }
+            
+            .chart
+            {
+                width: 100%;
+                background: #FFFFFF;
+                padding-top: 10px;
+                padding-bottom: 116px;
+            }
+          
+            .chart_row
+            {
+                margin-top: 20px;
+            }
+            
+            
+            .chart_container
+            {
+                width: calc(100% + 30px);
+                left: -px;
+            }
+            .chart
+            {
+                width: calc(100% / 2);
+                padding-left: 15px;
+                padding-right: 15px;
+                margin-bottom: 58px;
+            }
+            .chart_content
+            {
+            
+            }
+            .chart_image
+            {
+                width: 100%;
+            }
+           
+            
+    </style>
+    <title>DQ Report</title>
+</head>
+<body>
+    
+    <div class="chart" id="chart">
+		<div class="container">
+            
+			
+			<div class="row chart_row">
+				<div class="col">
+					<div class="chart_container item_grid">
+
+                        <!-- Destination -->
+                        
+						<div class="chart item">
+							<div class="chart_image">
+								<canvas id="myChartnullchk" width="100" height="100"></canvas>
+							</div>
+							
+                        </div>
+                        
+                        <div class="chart item">
+							<div class="chart_image">
+								<canvas id="myChartvalidvalues" width="100" height="100"></canvas>
+							</div>
+							
+						</div>
+
+						<div class="chart item">
+							<div class="chart_image">
+								<canvas id="myChartpatterncheck" width="100" height="100"></canvas>
+							</div>
+                        </div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+    
+
+
+    
+    <script src="https://code.jquery.com/jquery-3.4.0.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"script></script>
+    
+    <script>
+    
+        $(document).ready(function(){
+            var runbatchid = parseInt("{{ id }}")
+            var url = '/dqcharts/api/chartsdata/'
+
+            $.ajax({                       // initialize an AJAX request
+                url: url,                    // set the url of the request (= localhost:8000/ajax/loadbatchrun/)
+                data: {
+                'runbatchid': runbatchid // add the connection id to the GET parameters
+                },
+                success: function (data) {   // `data` is the return of the `loadbatchrun` view function
+                    
+                    console.log(data);
+                    console.log(data.labels)
+                    var nullcheckdata=data.Null_Check;
+                    var validvaluedata=data.Valid_Values;
+                    var patterncheckdata=data.Pattern_Check;
+
+                    if (nullcheckdata.totalcount != 0) {
+                        var ctx = document.getElementById('myChartnullchk');
+                        var myChart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels:nullcheckdata.labels,
+                                datasets: [{
+                                    label: nullcheckdata.DqruleName,
+                                    data: nullcheckdata.measuredcount,
+                                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                    borderColor: 'rgb(255, 99, 132)',
+                                    borderWidth:1,
+                                    barThickness: 80,
+                                    
+                                }]
+                            
+                            },
+                            options: {
+                                scales: {
+                                    yAxes: [{
+                                        ticks: {
+                                            min: 0,
+                                            max: nullcheckdata.totalcount,
+                                            beginAtZero: true
+                                        }
+                                    }]
+                                }
+                            }
+                        });
+                    }
+
+                    if (validvaluedata.totalcount != 0) {
+                        var ctx = document.getElementById('myChartvalidvalues');
+                        var myChart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels:validvaluedata.labels,
+                                datasets: [{
+                                    label: validvaluedata.DqruleName,
+                                    data: validvaluedata.measuredcount,
+                                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                    borderColor: 'rgb(255, 99, 132)',
+                                    borderWidth:1,
+                                    barThickness: 80,
+                                    
+                                }]
+                            
+                            },
+                            options: {
+                                scales: {
+                                    yAxes: [{
+                                        ticks: {
+                                            min: 0,
+                                            max: validvaluedata.totalcount,
+                                            beginAtZero: true
+                                        }
+                                    }]
+                                }
+                            }
+                        });
+                    }
+                    
+                    if (patterncheckdata.totalcount != 0) {
+                        var ctx = document.getElementById('myChartpatterncheck');
+                        var myChart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels:patterncheckdata.labels,
+                                datasets: [{
+                                    label: patterncheckdata.DqruleName,
+                                    data: patterncheckdata.measuredcount,
+                                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                    borderColor: 'rgb(255, 99, 132)',
+                                    borderWidth:1,
+                                    barThickness: 80,
+
+                                }]
+
+                            },
+                            options: {
+                                scales: {
+                                    yAxes: [{
+                                        ticks: {
+                                            min: 0,
+                                            max: patterncheckdata.totalcount,
+                                            beginAtZero: true
+                                        }
+                                    }]
+                                }
+                            }
+                        });
+                    }
+
+                //$("#runbatch").html(data);  // replace the contents of the column and dq rule input with the data that came from the server
+                }
+            });
+        });
+        
+
+    </script>
+
+</body>
+</html>

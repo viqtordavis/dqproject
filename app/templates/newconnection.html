@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="content">
+
+  <form action="addconnection" method="POST" id="newconnection" data-form-url="{% url 'loadform' %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    <h1>Create New Connection</h1>
+    
+    <!-- {{ form.as_p }} -->
+
+    <label for="id_connections">Select Database :</label>
+
+      <select id="id_connections" name="id_connections"  required>
+        <option value="" disabled="true" selected>-- Select --</option>
+        {% for connection in dblist %}
+        <option value="{{ connection.id }}">{{ connection.dbname }}</option>
+        {% endfor %} 
+    </select>
+ 
+ <br><br>   
+ <table name="forms"  id="forms"></table>
+ <div name="connectionstatus"  id="connectionstatus" ></div>
+
+ 
+ {% for message in messages %}
+ <div class="message">
+  <pre>{{ message|wordwrap:80 }}</pre>
+</div>
+ {% endfor %}
+
+  <input type="submit" name="connection" value="Add Connection">
+  <input type="button" id="testconnection" name="connection" value="Test Connection">
+  
+
+<br><br>
+
+</form>
+
+
+ <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+        $("#id_connections").change(function () {
+        var url = $("#newconnection").attr("data-form-url"); 
+        var selecteddb = $("#id_connections").val(); 
+        $.ajax({                  // initialize an AJAX request
+          url: url,                    // set the url of the request (= localhost:8000/hr/ajax/loadtables/)
+          data: {
+          'selecteddb': selecteddb       // add the connection id to the GET parameters
+          },
+          success: function (data) {   // `data` is the return of the `loadtables` view function
+              console.log(data);
+              $("#forms").html(data);// replace the contents of the table input with the data that came from the server
+          }
+      });
+        });
+
+        $('#testconnection').on('click',function () {
+          var url = '/ajax/load-form/';
+          var selecteddb = $("#id_connections").val();
+          var connection = $("#testconnection").val();
+          var dbname = $('input[name=dbname]').val();
+          var schemaname = $('input[name=schemaname]').val();
+          var username = $('input[name=username]').val();
+          var password = $('input[name=password]').val();
+          var hostname = $('input[name=hostname]').val();
+          var port = $('input[name=port]').val();
+          $.ajax({  
+            url: url,
+            data: {
+            'selecteddb': selecteddb,
+            'connection': connection,
+            'dbname' :dbname,
+            'schemaname' :schemaname,
+            'username':username,
+            'password':password,
+            'hostname':hostname,
+            'port':port,
+            },
+            
+            success: function (data) {   
+               // console.log(data);
+                $("#connectionstatus").html(data);
+               $("#connectionstatus").show().delay(6000).fadeOut(1000);
+            }
+        });
+          });
+          $(document).ready(function() {
+            // messages timeout for 10 sec 
+            $(".message").show().delay(6000).fadeOut(1000);
+        });
+  </script>
+
+</div>   
+    
+{% endblock %}

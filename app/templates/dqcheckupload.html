@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="content">
+<form  method="POST" enctype="multipart/form-data" id="fileForm">
+
+  {% csrf_token %}
+
+  <label for="dqcheckfile">
+    <strong>Upload the DQ check file</strong>
+  </label>
+  <br><br>
+  <input type="file" id="dqcheckfile" name="dqcheckfile">
+  <br><br>
+
+  <label for="delimiter">Field Separator : </label>
+  <select name="delimiter" id="delimiter">
+    <option value="comma">Comma</option>
+    <option value="pipe">Pipe</option>
+    <option value="tab">Tab</option>
+  </select>
+
+  <br><br>
+
+  <label for="filehead">First Line Column Names : </label>
+  <input type="checkbox" id="filehead" name="filehead" checked>
+  
+
+  <br><br>
+
+  <label for="filetrail">File Has Trailer : </label>
+  <input type="checkbox" id="filetrail" name="filetrail">
+  
+
+  <br><br>
+  
+  <input type="button" id="fileprofile" value="Run Profile" >
+
+ 
+
+<br><br>
+    {% for message in messages %}
+        {{ message }}
+    {% endfor %}
+
+</form>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script>
+
+var token = '{{csrf_token}}';
+
+
+  $(document).ready(function(){
+    $(document).on('click','#fileprofile', function(e){
+        e.preventDefault();
+        var data = new FormData();
+        var file = $('#dqcheckfile')[0].files[0]
+        var dlimiter = $('#delimiter').val()
+        var head = $('#filehead').val()
+        var trail = $('#filetrail').val()
+
+        data.append("file", file);
+        data.append("delimiter", dlimiter);
+        data.append("filehead", head);
+        data.append("filetrail", trail);
+
+        console.log(data)
+
+        var url = '/runfileprofile/';
+        $.ajax({
+          url: url,
+          type: 'POST',
+          headers: { "X-CSRFToken": token },
+          data: data,
+          enctype: 'multipart/form-data',
+          contentType: false,
+          processData: false,
+          success: function (data) {
+            console.log(data);
+            var newwindow = window.open("", "new window", "width=200, height=100");
+            newwindow.document.write(data)
+                          }
+      
+      });
+
+                               
+    });
+
+});
+
+
+</script>
+</div>
+{% endblock %}
