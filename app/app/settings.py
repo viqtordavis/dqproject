@@ -89,7 +89,7 @@ DATABASES = {
         'NAME': 'dataquality',
         'USER': 'dq',
         'PASSWORD': 'vqd2020',
-        'HOST': 'dq-db',
+        'HOST': 'mysql',
         'PORT': '3306',
     }
 }
